@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-''' This program sends a comand to the server
+''' This program sends a command to the server
     and transform its output in a readable view.
 '''
 
-import os
-import paramiko
-import os
+from subprocess import Popen, PIPE
 
 class DataGetter:
     ''' Abstract class for any data downloader. '''
 
     def get_data(self, string):
-        ''' Dowload all informayion from given ip address.
+        ''' Dowload all informayion from given ip_address address.
             Return string value, containing downloaded data.
         '''
         pass
@@ -24,9 +22,9 @@ class SshDataGetter(DataGetter):
     ''' Implementationt of DataGetter. '''
 
     def __init__(self):
-        self.comand = ''
+        self.command = ''
         self.username = ''
-        self.ip = ''
+        self.ip_address = ''
         self.password = ''
         self.data = ''
 
@@ -47,27 +45,20 @@ class SshDataGetter(DataGetter):
         ''' Method assigns data to specified fields. '''
         list_of_values = self.split_to_values(string)
         self.username = list_of_values[2]
-        self.ip = list_of_values[3]
+        self.ip_address = list_of_values[3]
         self.password = list_of_values[4]
-        self.comand = list_of_values[5]
-
-    def get_my_data(self):
-        my_file = open('/home/maria/prog/sfd/scts/my_data', 'r')
-        data = my_file.readlines()
-        self.ip = data[0]
-        self.username = data[1]
-        self.password = data[2]
-        my_file.close()
+        self.command = list_of_values[5]
 
 
     def get_data(self):
-        ''' Method connects to server and sends the comand. '''
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        print ('before connection')
-        ssh.connect(self.ip, username=self.username, password=self.password)
-        print ('after connection')
-        stdin, stdout, stderr = ssh.exec_command(self.comand)
-        self.data = stdout.read()
-        ssh.close()
+        ''' Method connects to server and sends the command. '''
+        run = 'sshpass -p {} ssh -o '.format(self.password)
+        run += 'StrictHostKeyChecking=no {}'.format(self.ip_address)
+        run += self.command
+        run2 = run.split()
+        proc = Popen(run2, stdout=PIPE)
+        output = proc.stdout.read()
+        proc.stdout.close()
+        output = output[:-1]
+        self.data = output.decode('UTF-8')
         return self.data
