@@ -8,15 +8,15 @@ from subprocess import Popen, PIPE
 class DataGetter:
     ''' Abstract class for any data downloader. '''
 
-    def get_data(self, string):
-        ''' Dowload all informayion from given ip_address address.
+    def get_data(self):
+        ''' Dowload all information from given ip_address address.
             Return string value, containing downloaded data.
         '''
-        pass
+        raise NotImplementedError
 
     def parse_data(self, data):
         ''' Parse given data. '''
-        pass
+        raise NotImplementedError
 
 class SshDataGetter(DataGetter):
     ''' Implementationt of DataGetter. '''
@@ -26,7 +26,7 @@ class SshDataGetter(DataGetter):
         self.username = ''
         self.ip_address = ''
         self.password = ''
-        self.data = ''
+        self.output_data = ''
 
     def split_to_values(self, given_string):
         ''' Method splits a string to list of values. '''
@@ -49,16 +49,21 @@ class SshDataGetter(DataGetter):
         self.password = list_of_values[4]
         self.command = list_of_values[5]
 
-
     def get_data(self):
         ''' Method connects to server and sends the command. '''
-        run = 'sshpass -p {} ssh -o '.format(self.password)
-        run += 'StrictHostKeyChecking=no {}'.format(self.ip_address)
-        run += self.command
-        run2 = run.split()
-        proc = Popen(run2, stdout=PIPE)
+        terminal_command = 'sshpass -p {} ssh -o '.format(self.password + '\n')
+        terminal_command += 'StrictHostKeyChecking=no {}'.format(
+            self.ip_address + '\n'
+            )
+        terminal_command += self.command
+        terminal_command_list = terminal_command.split()
+        proc = Popen(terminal_command_list, stdout=PIPE)
         output = proc.stdout.read()
         proc.stdout.close()
         output = output[:-1]
-        self.data = output.decode('UTF-8')
-        return self.data
+        self.output_data = output.decode('UTF-8')
+        return self.output_data
+
+    def parse_data(self, data):
+        #not implemeted yet
+        pass
