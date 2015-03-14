@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 ''' This program sends a command to the server
-    and transform its output in a readable view.
+    and transforms its output in a readable view.
 '''
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 
 class DataGetter:
     ''' Abstract class for any data downloader. '''
@@ -57,11 +57,19 @@ class SshDataGetter(DataGetter):
             )
         terminal_command += self.command
         terminal_command_list = terminal_command.split()
-        proc = Popen(terminal_command_list, stdout=PIPE)
-        output = proc.stdout.read()
-        proc.stdout.close()
-        output = output[:-1]
-        self.output_data = output.decode('UTF-8')
+        proc = Popen(terminal_command_list, stdout=PIPE, stderr=STDOUT)
+        if proc.stderr is not None:
+            error = proc.stderr.read()
+            proc.sdterr.close()
+            error = error[:-1]
+            error = error.decode('UTF-8')
+            self.output_data += error
+        if proc.stdout is not None:
+            output = proc.stdout.read()
+            proc.stdout.close()
+            output = output[:-1]
+            output = output.decode('UTF-8')
+            self.output_data += output
         return self.output_data
 
     def parse_data(self, data):
