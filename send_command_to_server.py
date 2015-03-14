@@ -8,13 +8,13 @@ from subprocess import Popen, PIPE, STDOUT
 class DataGetter:
     ''' Abstract class for any data downloader. '''
 
-    def get_data(self):
+    def get_output(self):
         ''' Dowload all information from given ip_address address.
             Return string value, containing downloaded data.
         '''
         raise NotImplementedError
 
-    def parse_data(self, data):
+    def parse_output(self, data):
         ''' Parse given data. '''
         raise NotImplementedError
 
@@ -49,7 +49,7 @@ class SshDataGetter(DataGetter):
         self.password = list_of_values[4]
         self.command = list_of_values[5]
 
-    def get_data(self):
+    def get_output(self):
         ''' Method connects to server and sends the command. '''
         terminal_command = 'sshpass -p {} ssh -o '.format(self.password + '\n')
         terminal_command += 'StrictHostKeyChecking=no {}'.format(
@@ -72,6 +72,6 @@ class SshDataGetter(DataGetter):
             self.output_data += output
         return self.output_data
 
-    def parse_data(self, data):
-        #not implemeted yet
-        pass
+    def parse_output(self):
+        ''' Method parses output and returns required data. '''
+        
