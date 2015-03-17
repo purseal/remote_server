@@ -8,9 +8,9 @@ class TestSShDataGetter(unittest.TestCase):
     ''' Class of test. '''
     string = "telnet -c 'echo xx' username ip_address password"
     words = ["telnet", "-c", "username", "ip_address", "password", "echo xx"]
-    my_command = 'echo it works!'
-    my_output_data = 'it works!'
-    output = 'param1:__15.4 MBIS 2'
+    my_command = 'echo param1:__15.4 MBIS 2'
+    my_output = 'param1:__15.4 MBIS 2'
+    out = '15 4'
     expected_analyzed_output = '15.4'
 
     def test_split_to_values(self):
@@ -36,21 +36,27 @@ class TestSShDataGetter(unittest.TestCase):
         ''' Method makes test of get_data in send_command_to_server.py. '''
         ssh_getter = SshGetter()
         #TODO: Enter you data in empty strings lower.
-        ssh_getter.ip_address = '' #your ip address
-        ssh_getter.username = '' #your username
-        ssh_getter.password = '' #your password
+        ssh_getter.ip_address = '127.0.0.1' #your ip address
+        ssh_getter.username = 'maria' #your username
+        ssh_getter.password = 'Lubitleto' #your password
         ssh_getter.command = self.my_command
         command_output = ssh_getter.get_output()
 
-        self.assertEqual(command_output, self.my_output_data)
+        self.assertEqual(command_output, self.my_output)
 
     def test_parse_output(self):
         ''' Method makes test of parse_output in send_command_to_server.py. '''
         ssh_getter = SshGetter()
-        ssh_getter.output_data = self.output
+        ssh_getter.output_data = self.out
+        analyzed_output = ssh_getter.parse_output()
+
+        self.assertEqual(analyzed_output, None)
+
+        ssh_getter.output_data = self.my_output
         analyzed_output = ssh_getter.parse_output()
 
         self.assertEqual(analyzed_output, self.expected_analyzed_output)
+
 
 if __name__ == '__main__':
     unittest.main()
