@@ -45,7 +45,9 @@ class TestSShDataGetter(unittest.TestCase):
         self.assertEqual(command_output, self.my_output)
 
     def test_parse_output(self):
-        ''' Method makes test of parse_output in send_command_to_server.py. '''
+        '''
+            Method makes test of parse_output in send_command_to_server.py.
+        '''
         ssh_getter = SshGetter()
         ssh_getter.output_data = self.out
         analyzed_output = ssh_getter.parse_output()

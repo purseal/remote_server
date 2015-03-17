@@ -76,6 +76,5 @@ class SshDataGetter(DataGetter):
     def parse_output(self):
         ''' Method parses output and returns required data. '''
         required_out = re.search(r'[\d]+\.[\d]+', self.output_data)
-        if required_out:
-            return required_out.group()
+        if required_out: return required_out.group()
         else: return None
