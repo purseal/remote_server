@@ -83,7 +83,7 @@ class SshDataGetter(DataGetter):
 
     def parse_volume(self):
         ''' Method parses output and returns volume.'''
-        volume = re.search('[\d]+\.[\d]+[GM]B', self.output_data)
+        volume = re.search('[\d]+\.[\d]+[GMKTPE]B', self.output_data)
         if volume:
             return volume.group()
         else:
