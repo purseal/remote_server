@@ -8,10 +8,15 @@ class TestSShDataGetter(unittest.TestCase):
     ''' Class of test. '''
     string = "telnet -c 'echo xx' username ip_address password"
     words = ["telnet", "-c", "username", "ip_address", "password", "echo xx"]
-    my_command = 'echo param1:__15.4 MBIS 2'
-    my_output = 'param1:__15.4 MBIS 2'
-    out = '15 4'
+    my_command = 'echo it works!'
+    my_output_data = 'it works!'
+    output = 'param1:__15.4 MBIS 2'
     expected_analyzed_output = '15.4'
+    get_max_volume = 'show system parameters'
+    output_with_volume_gb = 'param1: 15.4GB 32.4'
+    output_with_volume_mb = 'param1: 15.4MB 32.4'
+    required_volume_gb = '15.4GB'
+    required_volume_mb = '15.4MB'
 
     def test_split_to_values(self):
         ''' Method makes a test of split_to_values in
@@ -42,23 +47,32 @@ class TestSShDataGetter(unittest.TestCase):
         ssh_getter.command = self.my_command
         command_output = ssh_getter.get_output()
 
-        self.assertEqual(command_output, self.my_output)
+        self.assertEqual(command_output, self.my_output_data)
 
     def test_parse_output(self):
         '''
             Method makes test of parse_output in send_command_to_server.py.
         '''
         ssh_getter = SshGetter()
-        ssh_getter.output_data = self.out
-        analyzed_output = ssh_getter.parse_output()
-
-        self.assertEqual(analyzed_output, None)
-
-        ssh_getter.output_data = self.my_output
+        ssh_getter.output_data = self.output
         analyzed_output = ssh_getter.parse_output()
 
         self.assertEqual(analyzed_output, self.expected_analyzed_output)
 
+    def test_parse_volume(self):
+        '''
+            Method makes test of parse_volume in send_command_to_server.py.
+        '''
+        ssh_getter = SshGetter()
+        ssh_getter.output_data = self.output_with_volume_gb
+        analyzed_output = ssh_getter.parse_volume()
+
+        self.assertEqual(analyzed_output, self.required_volume_gb)
+
+        ssh_getter.output_data = self.output_with_volume_mb
+        analyzed_output = ssh_getter.parse_volume()
+
+        self.assertEqual(analyzed_output, self.required_volume_mb)
 
 if __name__ == '__main__':
     unittest.main()
