@@ -12,7 +12,6 @@ class TestSShDataGetter(unittest.TestCase):
     my_output_data = 'it works!'
     output = 'param1:__15.4 MBIS 2'
     expected_analyzed_output = '15.4'
-    get_max_volume = 'show system parameters'
     output_with_volume_gb = 'param1: 15.4GB 32.4'
     output_with_volume_mb = 'param1: 15.4MB 32.4'
     required_volume_gb = '15.4GB'

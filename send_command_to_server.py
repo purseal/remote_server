@@ -1,4 +1,4 @@
-#!/usr/bin/env python3c40f06b0e10e5ad8c0096362dbdac331c5fcc116
+#!/usr/bin/env python3
 ''' This program sends a command to the server
     and transforms its output in a readable view.
 '''
@@ -74,7 +74,10 @@ class SshDataGetter(DataGetter):
         return self.output_data
 
     def parse_output(self):
-        ''' Method parses output and returns required data. '''
+        '''
+            Method parses output and returns required data.
+            If it was not find, method returns None.
+        '''
         required_out = re.search(r'[\d]+\.[\d]+', self.output_data)
         if required_out:
             return required_out.group()
@@ -83,7 +86,7 @@ class SshDataGetter(DataGetter):
 
     def parse_volume(self):
         ''' Method parses output and returns volume.'''
-        volume = re.search('[\d]+\.[\d]+[GMKTPE]B', self.output_data)
+        volume = re.search('[\d]+\.[\d]+[KMGTPE]B', self.output_data)
         if volume:
             return volume.group()
         else:
