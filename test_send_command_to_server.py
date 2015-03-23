@@ -16,6 +16,12 @@ class TestSShDataGetter(unittest.TestCase):
     output_with_volume_mb = 'param1: 15.4MB 32.4'
     required_volume_gb = '15.4GB'
     required_volume_mb = '15.4MB'
+    volumes = '15.4GB 14.0GB'
+    volumes_gb_mb = '15.4GB 30.0MB'
+    required_volumes = ['15.4GB', '14.0GB']
+    required_volume_gb_mb = '15.43GB'
+    sensor_status_output = "1-Ctlr A 55 C OK\n1-Ctlr B 54  C OK"
+    required_sensor_status_output = ['55 C', '54  C']
 
     def test_split_to_values(self):
         ''' Method makes a test of split_to_values in
@@ -72,6 +78,34 @@ class TestSShDataGetter(unittest.TestCase):
         analyzed_output = ssh_getter.parse_volume()
 
         self.assertEqual(analyzed_output, self.required_volume_mb)
+
+    def test_parse_all_volumes(self):
+        ssh_getter = SshGetter()
+        ssh_getter.output_data = self.volumes
+        analyzed_output = ssh_getter.parse_all_volumes()
+
+        self.assertEqual(analyzed_output, self.required_volumes)
+
+        ssh_getter.output_data = self.sensor_status_output
+        analyzed_output = ssh_getter.parse_all_volumes()
+
+        self.assertEqual(analyzed_output, None)
+
+    def test_get_total_volume(self):
+        ssh_getter = SshGetter()
+        ssh_getter.output_data = self.volumes_gb_mb
+        analyzed_output = ssh_getter.get_total_volume()
+
+        self.assertEqual(analyzed_output, self.required_volume_gb_mb)
+
+    def test_parse_temperature(self):
+        ssh_getter = SshGetter()
+        ssh_getter.output_data = self.sensor_status_output
+        analyzed_output = ssh_getter.parse_temperature()
+
+        self.assertEqual(analyzed_output, self.required_sensor_status_output)
+
+
 
 if __name__ == '__main__':
     unittest.main()

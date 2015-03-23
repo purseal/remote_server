@@ -86,8 +86,44 @@ class SshDataGetter(DataGetter):
 
     def parse_volume(self):
         ''' Method parses output and returns volume.'''
-        volume = re.search('[\d]+\.[\d]+[KMGTPE]B', self.output_data)
+        volume = re.search(r'[\d]+\.[\d]+[KMGTPE]B', self.output_data)
         if volume:
             return volume.group()
+        else:
+            return None
+
+    def parse_all_volumes(self):
+        volumes = re.findall(r'[\d]+\.[\d]+[KMGTPE]B', self.output_data)
+        if volumes:
+            return volumes
+        else:
+            return None
+
+    def get_total_volume(self):
+        volumes = self.parse_all_volumes()
+        if volumes:
+            total_volume = 0
+            for size in volumes:
+                count = size[:-2]
+                if size[-2:] == 'MB':
+                    total_volume += float(count)/pow(1000, 1)
+                elif size[-2:] == 'KB':
+                    total_volume += float(count)/pow(1000, 2)
+                elif size[-2:] == 'TB':
+                    total_volume += float(count)*pow(1000, 1)
+                elif size[-2:] == 'PB':
+                    total_volume += float(count)*pow(1000, 2)
+                elif size[-2:] == 'EB':
+                    total_volume += float(count)*pow(1000, 3)
+                else:
+                    total_volume += float(count)
+            return str(total_volume)+'GB'
+        else:
+            return None
+
+    def parse_temperature(self):
+        temp = re.findall(r'[\d]+[\s]+C', self.output_data)
+        if temp:
+            return temp
         else:
             return None
