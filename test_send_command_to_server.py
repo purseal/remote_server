@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#pylint: disable=too-many-public-methods
+
 ''' This program makes test of program send_command_to_server. '''
 
 import unittest
@@ -49,9 +51,9 @@ class TestSShDataGetter(unittest.TestCase):
         ''' Method makes test of get_data in send_command_to_server.py. '''
         ssh_getter = SshGetter()
         #Enter you data in empty strings lower.
-        ssh_getter.ip_address = '' #your ip address
-        ssh_getter.username = '' #your username
-        ssh_getter.password = '' #your password
+        ssh_getter.ip_address = '127.0.0.1' #your ip address
+        ssh_getter.username = 'maria' #your username
+        ssh_getter.password = 'Lubitleto' #your password
         ssh_getter.command = self.my_command
         command_output = ssh_getter.get_output()
 

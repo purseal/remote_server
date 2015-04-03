@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+#pylint: disable=no-init
+#pylint: disable=no-self-use
+#pylint: disable=no-member
+#pylint: disable=abstract-class-little-used
+
 ''' This program sends a command to the server
     and transforms its output in a readable view.
 '''
