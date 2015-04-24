@@ -8,12 +8,12 @@ from send_command_to_server import SshDataGetter as SshGetter
 
 class TestSShDataGetter(unittest.TestCase):
     ''' Class of test. '''
-    string = "telnet -c 'echo xx' username ip_address password"
-    words = ["telnet", "-c", "username", "ip_address", "password", "echo xx"]
+    string = "ssh -c 'echo xx' username ip_address password"
+    words = ["ssh", "-c", "username", "ip_address", "password", "echo xx"]
     my_command = 'echo it works!'
     my_output_data = 'it works!'
     my_wrong_command = 'echoo it works!'
-    my_error_message = '''it works!bash: echoo: command not found'''
+    my_error_message = '''bash: echoo: command not found'''
     output = 'param1:__15.4 MBIS 2'
     expected_analyzed_output = '15.4'
     output_with_volume_gb = 'param1: 15.4GB 32.4'
@@ -108,6 +108,30 @@ class TestSShDataGetter(unittest.TestCase):
         analyzed_output = ssh_getter.parse_temperature()
 
         self.assertEqual(analyzed_output, self.required_sensor_status_output)
+
+  # def test_parse_temperature_server(self):
+  #     '''
+  #         Method makes test of parse_temperature in send_command_to_server.py.
+  #     '''
+  #     ssh_getter = SshGetter()
+  #     ssh_getter.ip_address = "10.1.5.1"
+  #     ssh_getter.password = "!manage"
+  #     ssh_getter.username = "manage"
+  #     ssh_getter.command = "show sensor-status"
+  #     analyzed_output = ssh_getter.parse_temperature()
+
+  #     self.assertEqual(analyzed_output, self.required_sensor_status_output)
+
+  # def test_get_volume_server(self):
+  #     ssh_getter = SshGetter()
+  #     ssh_getter.ip_address = "10.1.5.1"
+  #     ssh_getter.password = "!manage"
+  #     ssh_getter.username = "manage"
+  #     ssh_getter.command = "show volumes"
+  #     analyzed_output = ssh_getter.get_total_volume()
+
+  #     self.assertEqual(analyzed_output, self.required_volume_gb_mb)
+
 
 if __name__ == '__main__':
     unittest.main()
