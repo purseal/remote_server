@@ -31,6 +31,7 @@ class TestSShDataGetter(unittest.TestCase):
     output_of_disk_helth += "OK"
     disk_helth = {"0.0" : "OK"}
     server_disks_helth = {'0.0' : 'OK'}
+    server_current_volume = '356.7GB'
 
     def test_split_to_values(self):
         '''
@@ -104,6 +105,14 @@ class TestSShDataGetter(unittest.TestCase):
 
         self.assertEqual(analyzed_output, self.required_volume_gb_mb)
 
+    def test_parse_current_volume(self):
+        ssh_getter = SshGetter()
+        ssh_getter.output_data = self.volumes_gb_mb
+        analyzed_output = ssh_getter.parse_current_volume(0)
+
+        self.assertEqual(analyzed_output, self.required_volume_gb)
+
+
     def test_parse_temperature(self):
         '''
             Method makes test of parse_temperature in send_command_to_server.py.
@@ -163,6 +172,19 @@ class TestSShDataGetter(unittest.TestCase):
  #      analyzed_output = ssh_getter.get_disks_helth()
 
  #      self.assertEqual(analyzed_output, self.server_disks_helth)
+
+ #  def test_get_current_volume(self):
+ #      '''
+ #          Method makes test of get_current_volume in send_command_to_server.py.
+ #      '''
+ #      ssh_getter = SshGetter()
+ #      ssh_getter.ip_address = "10.1.5.1"
+ #      ssh_getter.password = "!manage"
+ #      ssh_getter.username = "manage"
+ #      ssh_getter.command = "show disks"
+ #      analyzed_output = ssh_getter.get_currnet_volume(0)
+
+ #      self.assertEqual(analyzed_output, self.server_current_volume)
 
 if __name__ == '__main__':
     unittest.main()

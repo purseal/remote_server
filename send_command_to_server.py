@@ -110,13 +110,21 @@ class SshDataGetter(DataGetter):
             return None
 
     def get_current_volume(self, vdisk_index):
-        ''' Method returns volume of vdisk by given index of disk. '''
+        ''' Method gets volume of vdisk by given index of disk. '''
+        self.command = "show volumes"
+        out = self.get_output();
+        return self.parse_current_volume(vdisk_index)
+
+    def parse_current_volume(self, vdisk_index):
+        ''' Method parses volume of vdisk by given index of disk. '''
         volumes = self.parse_all_volumes()
         volumes_gb = self.convert_volume_to_gb(volumes)
         return str(volumes_gb[vdisk_index]) + 'GB'
 
     def get_number_of_volumes(self):
         ''' Method returns number of vdisks. '''
+        self.command = "show volumes"
+        out = self.get_output();
         volumes = self.parse_all_volumes()
         return len(volumes)
 
@@ -144,7 +152,7 @@ class SshDataGetter(DataGetter):
         ''' Method gets total volume from server '''
         self.command = "show volumes"
         out = self.get_output();
-        volume = self.parse_total_volume()
+        return self.parse_total_volume()
 
     def parse_total_volume(self):
         '''
