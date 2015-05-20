@@ -11,6 +11,7 @@
 
 import re
 import paramiko
+import socket
 
 class DataGetter:
     ''' Abstract class for any data downloader. '''
@@ -57,19 +58,32 @@ class SshDataGetter(DataGetter):
         self.command = list_of_values[5]
 
     def get_output(self):
+        '''
+            Method connects to server, execute the command and returns the
+            output.
+        '''
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname=self.ip_address, username=self.username,
-                       password=self.password, port=22)
-        stdin, stdout, stderr = client.exec_command(self.command)
-        output = stdout.read() + stderr.read()
+        client.connect(hostname=self.ip_address, username=self.username, password=self.password, port=22)
+        shell = client.invoke_shell()
+        shell.settimeout(1)
+        shell.send(self.command + '\n')
+        out = ''
+      # import pdb; pdb.set_trace()
+        while True:
+            try:
+                my_out = shell.recv(1000)
+                my_out = my_out.decode('UTF-8')
+          #      print ('my_out: ', my_out)
+                if my_out != out:
+                    out = my_out
+                    self.output_data += my_out
+           #         shell.send('\n')
+            #        print(' \\n sent')
+            except socket.timeout:
+                break
+    #    print(self.output_data)
         client.close()
-        if output is not None:
-            output = output[:-1]
-            output = output.decode('UTF-8')
-            self.output_data = output
-        else:
-            self.output_data = None
         return self.output_data
 
     def parse_output(self):
@@ -95,58 +109,104 @@ class SshDataGetter(DataGetter):
         else:
             return None
 
+    def get_current_volume(self, vdisk_index):
+        ''' Method returns volume of vdisk by given index of disk. '''
+        volumes = self.parse_all_volumes()
+        volumes_gb = self.convert_volume_to_gb(volumes)
+        return str(volumes_gb[vdisk_index]) + 'GB'
+
+    def get_number_of_volumes(self):
+        ''' Method returns number of vdisks. '''
+        volumes = self.parse_all_volumes()
+        return len(volumes)
+
+    def convert_volume_to_gb(self, volumes):
+        ''' Converts given volume in GB '''
+        volumes_gb = []
+        for value in volumes:
+            unit = value[1]
+            count = value[0]
+            if unit == 'MB':
+                volumes_gb.append(float(count) / pow(1000, 1))
+            elif unit == 'KB':
+                volumes_gb.append(float(count) / pow(1000, 2))
+            elif unit == 'TB':
+                volumes_gb.append(float(count) * pow(1000, 1))
+            elif unit == 'PB':
+                volumes_gb.append(float(count) * pow(1000, 2))
+            elif unit == 'EB':
+                volumes_gb.append(float(count) * pow(1000, 3))
+            else:
+                volumes_gb.append(float(count))
+        return volumes_gb
+
     def get_total_volume(self):
+        ''' Method gets total volume from server '''
+        self.command = "show volumes"
+        out = self.get_output();
+        volume = self.parse_total_volume()
+
+    def parse_total_volume(self):
         '''
             Method parses output and returns a total VOLUME in GB.
             If a VOLUME was not found, method returns None.
         '''
-    #    self.command = "show volumes"
-    #    out = self.get_output();
         volumes = self.parse_all_volumes()
         if volumes:
             total_volume = 0
-            for value in volumes:
-                unit = value[1]
-                count = value[0]
-                if unit == 'MB':
-                    total_volume += float(count) / pow(1000, 1)
-                elif unit == 'KB':
-                    total_volume += float(count) / pow(1000, 2)
-                elif unit == 'TB':
-                    total_volume += float(count) * pow(1000, 1)
-                elif unit == 'PB':
-                    total_volume += float(count) * pow(1000, 2)
-                elif unit == 'EB':
-                    total_volume += float(count) * pow(1000, 3)
-                else:
-                    total_volume += float(count)
+            for volume in self.convert_volume_to_gb(volumes):
+                total_volume += volume
             return str(total_volume) + 'GB'
         else:
             return None
+
+    def get_temperature(self):
+        ''' Method gets temperatures of each sensor from server '''
+        self.command = "show sensor-status"
+        out = self.get_output()
+        return self.parse_temperature()
 
     def parse_temperature(self):
         '''
             Method parses output and returns a list of all temperatures,
             which was found. If a temperature was not found, it returns None.
         '''
-     #   self.command = "show sensor-status"
-     #   out = self.get_output()
-        temp = re.findall(r'[\d]+[\s]+C', self.output_data)
-        if temp:
-            return temp
+        data = re.findall(r'(\S+ \S+)[ ]+([\d]+[\s]+C)', self.output_data)
+        data = dict(data)
+        if data:
+            return data
         else:
             return None
+
+    def get_disks_helth(self):
+        ''' Method gets Helth of all disks. '''
+        self.command = 'show disks'
+        out = self.get_output()
+        return self.parse_disk_helth()
+
+    def parse_disks_helth(self):
+        '''
+            Method parses out and return a dictionary with Location as a key
+            and Health as a value
+        '''
+        helth = re.findall(r'^(\d+\.\d)( +\S+){7} +(\S+)', self.output_data)
+        helth_dict = {}
+        for elem in helth:
+            helth_dict.update({elem[0] : elem[2]})
+        return helth_dict
 
 if __name__ == '__main__':
     SSH_GETTER = SshDataGetter()
     SSH_GETTER.ip_address = "127.0.0.1"
     SSH_GETTER.password = "Lubitleto"
     SSH_GETTER.username = "maria"
-    RESULT_VOLUMES = SSH_GETTER.get_total_volume()
-    RESULT_TEMP = SSH_GETTER.parse_temperature()
-    print("List of volumes:")
-    for VOLUME in RESULT_VOLUMES:
-        print(VOLUME)
+    TOTAL_VOLUME = SSH_GETTER.get_total_volume()
+    print ('Total volume: \n', TOTAL_VOLUME)
+    NUMBER_OF_VDISKS = SSH_GETTER.get_number_of_volumes()
+    print ('Number of vdisks: ', NUMBER_OF_VDISKS)
+    CURRENT_VOLUME = SSH_GETTER.get_current_volume(0)
+    print ('Volume of 0 disk: ', CURRENT_VOLUME)
+    RESULT_TEMP = SSH_GETTER.get_temperature()
     print("Temperatures:")
     for TEMP in RESULT_TEMP:
         print(TEMP)
