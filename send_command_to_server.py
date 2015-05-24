@@ -68,32 +68,39 @@ class SshDataGetter(DataGetter):
         shell = client.invoke_shell()
         shell.settimeout(1)
         shell.send(self.command + '\n')
-        out = ''
-      # import pdb; pdb.set_trace()
+        previous_out = 'first out'
+      #  import pdb; pdb.set_trace()
         while True:
             try:
                 my_out = shell.recv(1000)
                 my_out = my_out.decode('UTF-8')
-          #      print ('my_out: ', my_out)
-                if my_out != out:
-                    out = my_out
+                print(len(my_out))
+                print ('my_out:\n', my_out, '\nend of my_out')
+                print('previous_out:\n', previous_out, '\nend')
+                if previous_out in my_out:
+                    previous_out = my_out
+                else:
+                    previous_out = my_out
                     self.output_data += my_out
-           #         shell.send('\n')
-            #        print(' \\n sent')
+                    shell.send('\n')
+                    print(' \\n sent')
             except socket.timeout:
                 break
-    #    print(self.output_data)
+        print(self.output_data)
         client.close()
+        self.parse_output()
         return self.output_data
 
     def parse_output(self):
         '''
-            Method parses output and returns required data in format 'x.y'.
+            Method parses output and returns output of command.
             If it was not found, method returns None.
         '''
-        required_out = re.search(r'[\d]+\.[\d]+', self.output_data)
-        if required_out:
-            return required_out.group()
+        pattern ='\$.*' + self.command + '[^a-zA-Z0-9]+(.*)'
+        command_out = re.findall(pattern, self.output_data)
+        if command_out:
+            self.output_data = command_out[0].rstrip()
+            return self.output_data
         else:
             return None
 
