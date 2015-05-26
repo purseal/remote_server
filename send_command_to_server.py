@@ -96,7 +96,7 @@ class SshDataGetter(DataGetter):
             Method parses output and returns output of command.
             If it was not found, method returns None.
         '''
-        pattern ='\$.*' + self.command + '[^a-zA-Z0-9]+(.*)'
+        pattern ='#.*' + self.command + '[^a-zA-Z0-9]+(.*)'
         command_out = re.findall(pattern, self.output_data)
         if command_out:
             self.output_data = command_out[0].rstrip()
